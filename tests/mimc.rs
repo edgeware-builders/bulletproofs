@@ -1,9 +1,3 @@
-extern crate rand;
-extern crate rand_chacha;
-extern crate curve25519_dalek;
-extern crate merlin;
-extern crate bulletproofs;
-
 use rand::SeedableRng;
 use rand_chacha::ChaChaRng;
 use curve25519_dalek::scalar::Scalar;

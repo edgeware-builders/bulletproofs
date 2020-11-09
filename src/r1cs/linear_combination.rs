@@ -1,9 +1,11 @@
 //! Definition of linear combinations.
 
 use curve25519_dalek::scalar::Scalar;
+#[cfg(feature = "std")]
 use std::iter::FromIterator;
+#[cfg(feature = "std")]
 use std::ops::{Add, Mul, Neg, Sub};
-
+#[cfg(feature = "std")]
 use std::collections::HashMap;
 
 /// Represents a variable in a constraint system.

@@ -1,7 +1,3 @@
-extern crate bulletproofs;
-extern crate curve25519_dalek;
-extern crate merlin;
-
 use bulletproofs::r1cs::{ConstraintSystem, R1CSError, R1CSProof, Variable, Prover, Verifier};
 use curve25519_dalek::scalar::Scalar;
 use bulletproofs::{BulletproofGens, PedersenGens};

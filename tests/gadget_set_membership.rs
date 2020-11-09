@@ -1,7 +1,3 @@
-extern crate bulletproofs;
-extern crate curve25519_dalek;
-extern crate merlin;
-
 use bulletproofs::r1cs::{ConstraintSystem, R1CSError, R1CSProof, Variable, Prover, Verifier};
 use curve25519_dalek::scalar::Scalar;
 use bulletproofs::{BulletproofGens, PedersenGens};
@@ -18,7 +14,7 @@ pub fn bit_gadget<CS: ConstraintSystem>(
 ) -> Result<(), R1CSError> {
     // TODO: Possible to save reallocation of `v` in `bit`?
     let (a, b, o) = cs.allocate_multiplier(v.assignment.map(|q| {
-        let bit: u64 = (q >> i) & 1;
+        let bit: u64 = (q >> 1) & 1;
         ((1 - bit).into(), bit.into())
     }))?;
 

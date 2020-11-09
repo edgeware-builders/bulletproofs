@@ -1,10 +1,5 @@
-extern crate byteorder;
-extern crate rand;
-extern crate rand_chacha;
-extern crate curve25519_dalek;
-
 use rand::SeedableRng;
-use rand::rngs::OsRng;
+use rand_core::OsRng;
 use rand_chacha::ChaChaRng;
 use curve25519_dalek::scalar::Scalar;
 use std::fmt;
@@ -155,7 +150,7 @@ pub fn get_bits(scalar: &Scalar) -> [i8; 256] {
 }
 
 pub fn scalar_to_u64_array(scalar: &Scalar) -> [u64; 4] {
-    use self::byteorder::{ByteOrder, LittleEndian};
+    use byteorder::{ByteOrder, LittleEndian};
     let bytes = scalar.to_bytes();
     let mut result = [0; 4];
     LittleEndian::read_u64_into(&bytes, &mut result);
@@ -163,7 +158,7 @@ pub fn scalar_to_u64_array(scalar: &Scalar) -> [u64; 4] {
 }
 
 pub fn u64_array_to_scalar(array: &[u64; 4]) -> Scalar {
-    use self::byteorder::{ByteOrder, LittleEndian};
+    use byteorder::{ByteOrder, LittleEndian};
     let mut result: [u8; 32] = [0; 32];
     LittleEndian::write_u64_into(array, &mut result);
     let s = Scalar::from_bits(result);
@@ -176,22 +171,22 @@ mod tests {
     use super::*;
     use curve25519_dalek::constants::BASEPOINT_ORDER;
 
-    #[test]
-    fn test_shl_shr() {
-        let mut csprng: OsRng = OsRng::new().unwrap();
-        for _ in 0..100 {
-            let r: Scalar = Scalar::random(&mut csprng);
-            let mut b_arr = ScalarBits::from_scalar(&r);
-            assert_eq!(r, b_arr.to_scalar());
-        }
+    // #[test]
+    // fn test_shl_shr() {
+    //     let mut csprng: OsRng = OsRng::new().unwrap();
+    //     for _ in 0..100 {
+    //         let r: Scalar = Scalar::random(&mut csprng);
+    //         let mut b_arr = ScalarBits::from_scalar(&r);
+    //         assert_eq!(r, b_arr.to_scalar());
+    //     }
 
-        /*let mut one = ScalarBitArray::from_scalar(&Scalar::one());
-        println!("{:?}", one.to_scalar());
-        for i in 0..TreeDepth {
-            one.shl();
-            println!("i={}, {:?}", i, one.to_scalar());
-        }*/
-    }
+    //     /*let mut one = ScalarBitArray::from_scalar(&Scalar::one());
+    //     println!("{:?}", one.to_scalar());
+    //     for i in 0..TreeDepth {
+    //         one.shl();
+    //         println!("i={}, {:?}", i, one.to_scalar());
+    //     }*/
+    // }
 
     #[test]
     fn test_scalar_to_u64_array() {

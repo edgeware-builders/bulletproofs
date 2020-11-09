@@ -1,9 +1,3 @@
-extern crate rand;
-extern crate rand_chacha;
-extern crate curve25519_dalek;
-extern crate merlin;
-extern crate bulletproofs;
-
 use std::collections::HashMap;
 use rand::SeedableRng;
 use rand::rngs::OsRng;
