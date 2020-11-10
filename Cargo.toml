@@ -50,50 +50,6 @@ name = "range_proof"
 name = "r1cs"
 required-features = ["yoloproofs"]
 
-[[test]]
-name = "gadget_range_proof"
-required-features = ["yoloproofs"]
-
-[[test]]
-name = "gadget_set_membership"
-required-features = ["yoloproofs"]
-
-[[test]]
-name = "basic_r1cs"
-required-features = ["yoloproofs"]
-
-[[test]]
-name = "gadget_zero_nonzero"
-required-features = ["yoloproofs"]
-
-[[test]]
-name = "gadget_set_non_membership"
-required-features = ["yoloproofs"]
-
-[[test]]
-name = "gadget_not_equals"
-required-features = ["yoloproofs"]
-
-[[test]]
-name = "gadget_bound_check"
-required-features = ["yoloproofs"]
-
-[[test]]
-name = "gadget_set_membership_1"
-required-features = ["yoloproofs"]
-
-[[test]]
-name = "mimc"
-required-features = ["yoloproofs"]
-
-[[test]]
-name = "gadget_vsmt"
-required-features = ["yoloproofs"]
-
-[[test]]
-name = "gadget_osmt"
-required-features = ["yoloproofs"]
-
 [[bench]]
 name = "range_proof"
 harness = false
