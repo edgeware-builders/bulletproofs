@@ -38,7 +38,7 @@ bincode = "1"
 rand_chacha = "0.2"
 
 [features]
-default = ["std", "avx2_backend", "yoloproofs"]
+default = ["std", "yoloproofs"]
 avx2_backend = ["curve25519-dalek/avx2_backend"]
 yoloproofs = []
 std = ["rand", "rand/std", "thiserror"]
@@ -54,9 +54,9 @@ required-features = ["yoloproofs"]
 name = "gadget_range_proof"
 required-features = ["yoloproofs"]
 
-#[[test]]
-#name = "gadget_set_membership"
-#required-features = ["yoloproofs"]
+[[test]]
+name = "gadget_set_membership"
+required-features = ["yoloproofs"]
 
 [[test]]
 name = "basic_r1cs"
