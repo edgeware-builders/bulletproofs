@@ -123,6 +123,7 @@ impl LinearCombination {
     /// Simplify linear combination by taking Variables common across terms and adding their corresponding scalars.
     /// Useful when linear combinations become large. Takes ownership of linear combination as this function is useful
     /// when memory is limited and the obvious action after this function call will be to free the memory held by the old linear combination
+    #[cfg(feature = "std")]
     pub fn simplify(self) -> Self {
         // Build hashmap to hold unique variables with their values.
         let mut vars: HashMap<Variable, Scalar> = HashMap::new();

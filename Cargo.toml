@@ -38,7 +38,7 @@ bincode = "1"
 rand_chacha = "0.2"
 
 [features]
-default = ["std", "avx2_backend"]
+default = ["std", "avx2_backend", "yoloproofs"]
 avx2_backend = ["curve25519-dalek/avx2_backend"]
 yoloproofs = []
 std = ["rand", "rand/std", "thiserror"]
