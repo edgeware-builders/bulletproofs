@@ -38,7 +38,7 @@ bincode = "1"
 rand_chacha = "0.2"
 
 [features]
-default = ["std", "avx2_backend", "yoloproofs"]
+default = ["std", "yoloproofs"]
 avx2_backend = ["curve25519-dalek/avx2_backend"]
 yoloproofs = []
 std = ["rand", "rand/std", "thiserror"]
@@ -48,50 +48,6 @@ name = "range_proof"
 
 [[test]]
 name = "r1cs"
-required-features = ["yoloproofs"]
-
-[[test]]
-name = "gadget_range_proof"
-required-features = ["yoloproofs"]
-
-#[[test]]
-#name = "gadget_set_membership"
-#required-features = ["yoloproofs"]
-
-[[test]]
-name = "basic_r1cs"
-required-features = ["yoloproofs"]
-
-[[test]]
-name = "gadget_zero_nonzero"
-required-features = ["yoloproofs"]
-
-[[test]]
-name = "gadget_set_non_membership"
-required-features = ["yoloproofs"]
-
-[[test]]
-name = "gadget_not_equals"
-required-features = ["yoloproofs"]
-
-[[test]]
-name = "gadget_bound_check"
-required-features = ["yoloproofs"]
-
-[[test]]
-name = "gadget_set_membership_1"
-required-features = ["yoloproofs"]
-
-[[test]]
-name = "mimc"
-required-features = ["yoloproofs"]
-
-[[test]]
-name = "gadget_vsmt"
-required-features = ["yoloproofs"]
-
-[[test]]
-name = "gadget_osmt"
 required-features = ["yoloproofs"]
 
 [[bench]]
