@@ -14,7 +14,7 @@ use curve25519_dalek::scalar::Scalar;
 use crate::generators::{BulletproofGens, PedersenGens};
 
 /// A commitment to the bits of a party's value.
-#[derive(Serialize, Deserialize, Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct BitCommitment {
     pub(super) V_j: CompressedRistretto,
     pub(super) A_j: RistrettoPoint,
@@ -22,28 +22,28 @@ pub struct BitCommitment {
 }
 
 /// Challenge values derived from all parties' [`BitCommitment`]s.
-#[derive(Serialize, Deserialize, Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct BitChallenge {
     pub(super) y: Scalar,
     pub(super) z: Scalar,
 }
 
 /// A commitment to a party's polynomial coefficents.
-#[derive(Serialize, Deserialize, Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct PolyCommitment {
     pub(super) T_1_j: RistrettoPoint,
     pub(super) T_2_j: RistrettoPoint,
 }
 
 /// Challenge values derived from all parties' [`PolyCommitment`]s.
-#[derive(Serialize, Deserialize, Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct PolyChallenge {
     pub(super) x: Scalar,
 }
 
 /// A party's proof share, ready for aggregation into the final
 /// [`RangeProof`](::RangeProof).
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct ProofShare {
     pub(super) t_x: Scalar,
     pub(super) t_x_blinding: Scalar,

@@ -139,13 +139,12 @@ pub enum R1CSError {
     /// a variable assignment is not provided when the prover needs it.
     #[cfg_attr(feature = "std", error("Variable does not have a value assignment."))]
     MissingAssignment,
-
-    /// Occurs when a gadget receives an inconsistent input.
-    #[cfg_attr(feature = "std", error("Gadget error: {description:?}"))]
-    GadgetError {
-        /// The description of the reasons for the error.
-        description: String,
-    },
+    // Occurs when a gadget receives an inconsistent input.
+    // #[cfg_attr(feature = "std", error("Gadget error: {description:?}"))]
+    // GadgetError {
+    // 	/// The description of the reasons for the error.
+    // 	description: String,
+    // },
 }
 
 #[cfg(feature = "yoloproofs")]
