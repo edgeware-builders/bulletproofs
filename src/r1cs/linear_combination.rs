@@ -4,7 +4,7 @@ use alloc::vec::Vec;
 use core::iter::FromIterator;
 use core::ops::{Add, Mul, Neg, Sub};
 use curve25519_dalek::scalar::Scalar;
-use hashbrown::hash_map::HashMap;
+use hashbrown::HashMap;
 
 /// Represents a variable in a constraint system.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
