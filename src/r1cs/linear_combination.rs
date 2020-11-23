@@ -123,7 +123,7 @@ impl LinearCombination {
 	/// when memory is limited and the obvious action after this function call will be to free the memory held by the old linear combination
 	pub fn simplify(self) -> Self {
 		// Build hashmap to hold unique variables with their values.
-		let mut vars: HashMap<Variable, Scalar> = HashMap::new();
+		let mut vars: HashMap<Variable, Scalar> = HashMap::default();
 
 		let terms = self.get_terms();
 		for (var, val) in terms {
