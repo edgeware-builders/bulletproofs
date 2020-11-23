@@ -81,7 +81,10 @@ pub trait ConstraintSystem {
     /// Allocate a single variable using a closure, similar to `allocate`.
     /// When allocating left variable, return left variable and None.
     /// When allocating right variable, return right variable and output variable.
-    fn allocate_single(&mut self, assignment: Option<Scalar>) -> Result<(Variable, Option<Variable>), R1CSError>;
+    fn allocate_single(
+        &mut self,
+        assignment: Option<Scalar>,
+    ) -> Result<(Variable, Option<Variable>), R1CSError>;
 }
 
 /// An extension to the constraint system trait that permits randomized constraints.
