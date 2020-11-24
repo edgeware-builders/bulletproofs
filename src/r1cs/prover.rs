@@ -1,11 +1,14 @@
 #![allow(non_snake_case)]
 
+use alloc::boxed::Box;
+use alloc::vec::Vec;
 use clear_on_drop::clear::Clear;
 use core::mem;
 use curve25519_dalek::ristretto::{CompressedRistretto, RistrettoPoint};
 use curve25519_dalek::scalar::Scalar;
 use curve25519_dalek::traits::{Identity, MultiscalarMul};
 use merlin::Transcript;
+use rand_core::{CryptoRng, RngCore};
 
 use super::{
 	ConstraintSystem, LinearCombination, R1CSProof, RandomizableConstraintSystem,
@@ -16,6 +19,9 @@ use crate::errors::R1CSError;
 use crate::generators::{BulletproofGens, PedersenGens};
 use crate::inner_product_proof::InnerProductProof;
 use crate::transcript::TranscriptProtocol;
+
+#[cfg(feature = "std")]
+use rand::thread_rng;
 
 /// A [`ConstraintSystem`] implementation for use by the prover.
 ///
@@ -407,9 +413,19 @@ impl<'t, 'g> Prover<'t, 'g> {
 	}
 
 	/// Consume this `ConstraintSystem` to produce a proof.
+	#[cfg(feature = "std")]
 	pub fn prove(mut self, bp_gens: &BulletproofGens) -> Result<R1CSProof, R1CSError> {
+		self.prove_with_rng(&bp_gens, &mut thread_rng())
+	}
+
+	/// Consume this `ConstraintSystem` to produce a proof.
+	pub fn prove_with_rng<T: RngCore + CryptoRng>(
+		mut self,
+		bp_gens: &BulletproofGens,
+		prng: &mut T,
+	) -> Result<R1CSProof, R1CSError> {
 		use crate::util;
-		use std::iter;
+		use core::iter;
 
 		// Commit a length _suffix_ for the number of high-level variables.
 		// We cannot do this in advance because user can commit variables one-by-one,
@@ -438,8 +454,7 @@ impl<'t, 'g> Prover<'t, 'g> {
 				builder = builder.rekey_with_witness_bytes(b"v_blinding", v_b.as_bytes());
 			}
 
-			use rand::thread_rng;
-			builder.finalize(&mut thread_rng())
+			builder.finalize(prng)
 		};
 
 		// Commit to the first-phase low-level witness variables.

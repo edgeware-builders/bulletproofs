@@ -1,10 +1,16 @@
 #![allow(non_snake_case)]
 
+use alloc::boxed::Box;
+use alloc::vec::Vec;
 use core::mem;
 use curve25519_dalek::ristretto::{CompressedRistretto, RistrettoPoint};
 use curve25519_dalek::scalar::Scalar;
 use curve25519_dalek::traits::VartimeMultiscalarMul;
 use merlin::Transcript;
+use rand_core::{CryptoRng, RngCore};
+
+#[cfg(feature = "std")]
+use rand::thread_rng;
 
 use super::{
 	ConstraintSystem, LinearCombination, R1CSProof, RandomizableConstraintSystem,
@@ -121,6 +127,9 @@ impl<'t> ConstraintSystem for Verifier<'t> {
 	}
 
 	fn constrain(&mut self, lc: LinearCombination) {
+		// TODO: check that the linear combinations are valid
+		// (e.g. that variables are valid, that the linear combination
+		// evals to 0 for prover, etc).
 		self.constraints.push(lc);
 	}
 
@@ -347,17 +356,28 @@ impl<'t> Verifier<'t> {
 		}
 	}
 
+	#[cfg(feature = "std")]
+	pub fn verify(
+		mut self,
+		proof: &R1CSProof,
+		pc_gens: &PedersenGens,
+		bp_gens: &BulletproofGens,
+	) -> Result<(), R1CSError> {
+		self.verify_with_rng(proof, pc_gens, bp_gens, &mut thread_rng())
+	}
+
 	/// Consume this `VerifierCS` and attempt to verify the supplied `proof`.
 	/// The `pc_gens` and `bp_gens` are generators for Pedersen commitments and
 	/// Bulletproofs vector commitments, respectively.  The
 	/// [`BulletproofGens`] should have `gens_capacity` greater than
 	/// the number of multiplication constraints that will eventually
 	/// be added into the constraint system.
-	pub fn verify(
+	pub fn verify_with_rng<T: RngCore + CryptoRng>(
 		mut self,
 		proof: &R1CSProof,
 		pc_gens: &PedersenGens,
 		bp_gens: &BulletproofGens,
+		prng: &mut T,
 	) -> Result<(), R1CSError> {
 		// Commit a length _suffix_ for the number of high-level variables.
 		// We cannot do this in advance because user can commit variables one-by-one,
@@ -384,7 +404,7 @@ impl<'t> Verifier<'t> {
 
 		use crate::inner_product_proof::inner_product;
 		use crate::util;
-		use std::iter;
+		use core::iter;
 
 		if bp_gens.gens_capacity < padded_n {
 			return Err(R1CSError::InvalidGeneratorsLength);
@@ -471,8 +491,7 @@ impl<'t> Verifier<'t> {
 		// Create a `TranscriptRng` from the transcript. The verifier
 		// has no witness data to commit, so this just mixes external
 		// randomness into the existing transcript.
-		use rand::thread_rng;
-		let mut rng = self.transcript.build_rng().finalize(&mut thread_rng());
+		let mut rng = self.transcript.build_rng().finalize(prng);
 		let r = Scalar::random(&mut rng);
 
 		let xx = x * x;

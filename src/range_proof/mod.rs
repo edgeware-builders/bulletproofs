@@ -23,8 +23,8 @@ use crate::transcript::TranscriptProtocol;
 use crate::util;
 
 use rand_core::{CryptoRng, RngCore};
-use serde::de::Visitor;
-use serde::{self, Deserialize, Deserializer, Serialize, Serializer};
+// use serde::de::Visitor;
+// use serde::{self, Deserialize, Deserializer, Serialize, Serializer};
 
 // Modules for MPC protocol
 
@@ -538,47 +538,47 @@ impl RangeProof {
     }
 }
 
-impl Serialize for RangeProof {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_bytes(&self.to_bytes()[..])
-    }
-}
+// impl Serialize for RangeProof {
+//     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+//     where
+//         S: Serializer,
+//     {
+//         serializer.serialize_bytes(&self.to_bytes()[..])
+//     }
+// }
 
-impl<'de> Deserialize<'de> for RangeProof {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        struct RangeProofVisitor;
+// impl<'de> Deserialize<'de> for RangeProof {
+//     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+//     where
+//         D: Deserializer<'de>,
+//     {
+//         struct RangeProofVisitor;
 
-        impl<'de> Visitor<'de> for RangeProofVisitor {
-            type Value = RangeProof;
+//         impl<'de> Visitor<'de> for RangeProofVisitor {
+//             type Value = RangeProof;
 
-            fn expecting(&self, formatter: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                formatter.write_str("a valid RangeProof")
-            }
+//             fn expecting(&self, formatter: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+//                 formatter.write_str("a valid RangeProof")
+//             }
 
-            fn visit_bytes<E>(self, v: &[u8]) -> Result<RangeProof, E>
-            where
-                E: serde::de::Error,
-            {
-                // Using Error::custom requires T: Display, which our error
-                // type only implements when it implements std::error::Error.
-                #[cfg(feature = "std")]
-                return RangeProof::from_bytes(v).map_err(serde::de::Error::custom);
-                // In no-std contexts, drop the error message.
-                #[cfg(not(feature = "std"))]
-                return RangeProof::from_bytes(v)
-                    .map_err(|_| serde::de::Error::custom("deserialization error"));
-            }
-        }
+//             fn visit_bytes<E>(self, v: &[u8]) -> Result<RangeProof, E>
+//             where
+//                 E: serde::de::Error,
+//             {
+//                 // Using Error::custom requires T: Display, which our error
+//                 // type only implements when it implements std::error::Error.
+//                 #[cfg(feature = "std")]
+//                 return RangeProof::from_bytes(v).map_err(serde::de::Error::custom);
+//                 // In no-std contexts, drop the error message.
+//                 #[cfg(not(feature = "std"))]
+//                 return RangeProof::from_bytes(v)
+//                     .map_err(|_| serde::de::Error::custom("deserialization error"));
+//             }
+//         }
 
-        deserializer.deserialize_bytes(RangeProofVisitor)
-    }
-}
+//         deserializer.deserialize_bytes(RangeProofVisitor)
+//     }
+// }
 
 /// Compute
 /// \\[
@@ -644,45 +644,45 @@ mod tests {
         let bp_gens = BulletproofGens::new(max_bitsize, max_parties);
 
         // Prover's scope
-        let (proof_bytes, value_commitments) = {
-            use self::rand::Rng;
-            let mut rng = rand::thread_rng();
+        // let (proof_bytes, value_commitments) = {
+        //     use self::rand::Rng;
+        //     let mut rng = rand::thread_rng();
 
-            // 0. Create witness data
-            let (min, max) = (0u64, ((1u128 << n) - 1) as u64);
-            let values: Vec<u64> = (0..m).map(|_| rng.gen_range(min, max)).collect();
-            let blindings: Vec<Scalar> = (0..m).map(|_| Scalar::random(&mut rng)).collect();
+        //     // 0. Create witness data
+        //     let (min, max) = (0u64, ((1u128 << n) - 1) as u64);
+        //     let values: Vec<u64> = (0..m).map(|_| rng.gen_range(min, max)).collect();
+        //     let blindings: Vec<Scalar> = (0..m).map(|_| Scalar::random(&mut rng)).collect();
 
-            // 1. Create the proof
-            let mut transcript = Transcript::new(b"AggregatedRangeProofTest");
-            let (proof, value_commitments) = RangeProof::prove_multiple(
-                &bp_gens,
-                &pc_gens,
-                &mut transcript,
-                &values,
-                &blindings,
-                n,
-            )
-            .unwrap();
+        //     // 1. Create the proof
+        //     let mut transcript = Transcript::new(b"AggregatedRangeProofTest");
+        //     let (proof, value_commitments) = RangeProof::prove_multiple(
+        //         &bp_gens,
+        //         &pc_gens,
+        //         &mut transcript,
+        //         &values,
+        //         &blindings,
+        //         n,
+        //     )
+        //     .unwrap();
 
-            // 2. Return serialized proof and value commitments
-            (bincode::serialize(&proof).unwrap(), value_commitments)
-        };
+        //     // 2. Return serialized proof and value commitments
+        //     (bincode::serialize(&proof).unwrap(), value_commitments)
+        // };
 
-        println!("proof byte size = {}", proof_bytes.len());
+        // println!("proof byte size = {}", proof_bytes.len());
 
         // Verifier's scope
-        {
-            // 3. Deserialize
-            let proof: RangeProof = bincode::deserialize(&proof_bytes).unwrap();
+        // {
+        //     // 3. Deserialize
+        //     let proof: RangeProof = bincode::deserialize(&proof_bytes).unwrap();
 
-            // 4. Verify with the same customization label as above
-            let mut transcript = Transcript::new(b"AggregatedRangeProofTest");
+        //     // 4. Verify with the same customization label as above
+        //     let mut transcript = Transcript::new(b"AggregatedRangeProofTest");
 
-            assert!(proof
-                .verify_multiple(&bp_gens, &pc_gens, &mut transcript, &value_commitments, n)
-                .is_ok());
-        }
+        //     assert!(proof
+        //         .verify_multiple(&bp_gens, &pc_gens, &mut transcript, &value_commitments, n)
+        //         .is_ok());
+        // }
     }
 
     #[test]

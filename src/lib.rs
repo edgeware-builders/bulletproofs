@@ -7,10 +7,11 @@
 #![doc(html_logo_url = "https://doc.dalek.rs/assets/dalek-logo-clear.png")]
 #![doc(html_root_url = "https://docs.rs/bulletproofs/2.0.0")]
 
+#[macro_use]
 extern crate alloc;
 
-#[macro_use]
-extern crate serde_derive;
+// #[macro_use]
+// extern crate serde_derive;
 
 mod util;
 
