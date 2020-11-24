@@ -6,7 +6,7 @@ use core::ops::{Add, Mul, Neg, Sub};
 use curve25519_dalek::scalar::Scalar;
 
 /// Represents a variable in a constraint system.
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Variable {
 	/// Represents an external input specified by a commitment.
 	Committed(usize),
