@@ -3,10 +3,12 @@
 use alloc::vec::Vec;
 use core::iter::FromIterator;
 use core::ops::{Add, Mul, Neg, Sub};
+use core::cmp::Ord;
 use curve25519_dalek::scalar::Scalar;
+use sp_std::collections::btree_map::BTreeMap;
 
 /// Represents a variable in a constraint system.
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
 pub enum Variable {
 	/// Represents an external input specified by a commitment.
 	Committed(usize),
@@ -116,6 +118,25 @@ impl LinearCombination {
 	pub fn get_terms(self) -> Vec<(Variable, Scalar)> {
 		self.terms
 	}
+
+	/// Simplify linear combination by taking Variables common across terms and adding their corresponding scalars.
+	/// Useful when linear combinations become large. Takes ownership of linear combination as this function is useful
+	/// when memory is limited and the obvious action after this function call will be to free the memory held by the old linear combination
+	pub fn simplify(self) -> Self {
+		// Build hashmap to hold unique variables with their values.
+		let mut vars: BTreeMap<Variable, Scalar> = BTreeMap::new();
+
+		let terms = self.get_terms();
+		for (var, val) in terms {
+			*vars.entry(var).or_insert(Scalar::zero()) += val;
+		}
+
+		let mut new_lc_terms = vec![];
+		for (var, val) in vars {
+			new_lc_terms.push((var, val));
+		}
+		new_lc_terms.iter().collect()
+	}	
 }
 
 impl Default for LinearCombination {
