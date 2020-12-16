@@ -23,8 +23,11 @@ use crate::transcript::TranscriptProtocol;
 use crate::util;
 
 use rand_core::{CryptoRng, RngCore};
-// use serde::de::Visitor;
-// use serde::{self, Deserialize, Deserializer, Serialize, Serializer};
+
+#[cfg(feature = "std")]
+use serde::de::Visitor;
+#[cfg(feature = "std")]
+use serde::{self, Deserialize, Deserializer, Serialize, Serializer};
 
 // Modules for MPC protocol
 
@@ -538,47 +541,49 @@ impl RangeProof {
     }
 }
 
-// impl Serialize for RangeProof {
-//     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-//     where
-//         S: Serializer,
-//     {
-//         serializer.serialize_bytes(&self.to_bytes()[..])
-//     }
-// }
+#[cfg(feature = "std")]
+impl Serialize for RangeProof {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_bytes(&self.to_bytes()[..])
+    }
+}
 
-// impl<'de> Deserialize<'de> for RangeProof {
-//     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-//     where
-//         D: Deserializer<'de>,
-//     {
-//         struct RangeProofVisitor;
+#[cfg(feature = "std")]
+impl<'de> Deserialize<'de> for RangeProof {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct RangeProofVisitor;
 
-//         impl<'de> Visitor<'de> for RangeProofVisitor {
-//             type Value = RangeProof;
+        impl<'de> Visitor<'de> for RangeProofVisitor {
+            type Value = RangeProof;
 
-//             fn expecting(&self, formatter: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-//                 formatter.write_str("a valid RangeProof")
-//             }
+            fn expecting(&self, formatter: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+                formatter.write_str("a valid RangeProof")
+            }
 
-//             fn visit_bytes<E>(self, v: &[u8]) -> Result<RangeProof, E>
-//             where
-//                 E: serde::de::Error,
-//             {
-//                 // Using Error::custom requires T: Display, which our error
-//                 // type only implements when it implements std::error::Error.
-//                 #[cfg(feature = "std")]
-//                 return RangeProof::from_bytes(v).map_err(serde::de::Error::custom);
-//                 // In no-std contexts, drop the error message.
-//                 #[cfg(not(feature = "std"))]
-//                 return RangeProof::from_bytes(v)
-//                     .map_err(|_| serde::de::Error::custom("deserialization error"));
-//             }
-//         }
+            fn visit_bytes<E>(self, v: &[u8]) -> Result<RangeProof, E>
+            where
+                E: serde::de::Error,
+            {
+                // Using Error::custom requires T: Display, which our error
+                // type only implements when it implements std::error::Error.
+                #[cfg(feature = "std")]
+                return RangeProof::from_bytes(v).map_err(serde::de::Error::custom);
+                // In no-std contexts, drop the error message.
+                #[cfg(not(feature = "std"))]
+                return RangeProof::from_bytes(v)
+                    .map_err(|_| serde::de::Error::custom("deserialization error"));
+            }
+        }
 
-//         deserializer.deserialize_bytes(RangeProofVisitor)
-//     }
-// }
+        deserializer.deserialize_bytes(RangeProofVisitor)
+    }
+}
 
 /// Compute
 /// \\[

@@ -25,8 +25,8 @@ digest = { version = "0.9.0", default-features = false, features = ["alloc"] }
 rand_core = { version = "0.5", default-features = false, features = ["alloc"] }
 rand = { version = "0.7", default-features = false, optional = true }
 byteorder = { version = "1", default-features = false }
-# serde = { version = "1", default-features = false, features = ["alloc"] }
-# serde_derive = { version = "1", default-features = false }
+serde = { version = "1", default-features = false, features = ["alloc"], optional = true }
+serde_derive = { version = "1", default-features = false, optional = true }
 thiserror = { version = "1", optional = true }
 merlin = { version = "2", default-features = false }
 clear_on_drop = { version = "0.2", default-features = false, features = ["nightly"] }
@@ -44,7 +44,7 @@ rand_chacha = "0.2"
 default = ["std"]
 avx2_backend = ["curve25519-dalek/avx2_backend"]
 yoloproofs = ["sp-std"]
-std = ["rand", "rand/std", "thiserror"]
+std = ["serde", "serde_derive", "rand", "rand/std", "thiserror"]
 
 [[test]]
 name = "range_proof"

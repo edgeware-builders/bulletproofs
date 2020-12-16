@@ -205,44 +205,46 @@ impl R1CSProof {
     }
 }
 
-// impl Serialize for R1CSProof {
-//     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-//     where
-//         S: Serializer,
-//     {
-//         serializer.serialize_bytes(&self.to_bytes()[..])
-//     }
-// }
+#[cfg(feature = "std")]
+impl Serialize for R1CSProof {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_bytes(&self.to_bytes()[..])
+    }
+}
 
-// impl<'de> Deserialize<'de> for R1CSProof {
-//     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-//     where
-//         D: Deserializer<'de>,
-//     {
-//         struct R1CSProofVisitor;
+#[cfg(feature = "std")]
+impl<'de> Deserialize<'de> for R1CSProof {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct R1CSProofVisitor;
 
-//         impl<'de> Visitor<'de> for R1CSProofVisitor {
-//             type Value = R1CSProof;
+        impl<'de> Visitor<'de> for R1CSProofVisitor {
+            type Value = R1CSProof;
 
-//             fn expecting(&self, formatter: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
-//                 formatter.write_str("a valid R1CSProof")
-//             }
+            fn expecting(&self, formatter: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
+                formatter.write_str("a valid R1CSProof")
+            }
 
-//             fn visit_bytes<E>(self, v: &[u8]) -> Result<R1CSProof, E>
-//             where
-//                 E: serde::de::Error,
-//             {
-//                 // Using Error::custom requires T: Display, which our error
-//                 // type only implements when it implements std::error::Error.
-//                 #[cfg(feature = "std")]
-//                 return R1CSProof::from_bytes(v).map_err(serde::de::Error::custom);
-//                 // In no-std contexts, drop the error message.
-//                 #[cfg(not(feature = "std"))]
-//                 return R1CSProof::from_bytes(v)
-//                     .map_err(|_| serde::de::Error::custom("deserialization error"));
-//             }
-//         }
+            fn visit_bytes<E>(self, v: &[u8]) -> Result<R1CSProof, E>
+            where
+                E: serde::de::Error,
+            {
+                // Using Error::custom requires T: Display, which our error
+                // type only implements when it implements std::error::Error.
+                #[cfg(feature = "std")]
+                return R1CSProof::from_bytes(v).map_err(serde::de::Error::custom);
+                // In no-std contexts, drop the error message.
+                #[cfg(not(feature = "std"))]
+                return R1CSProof::from_bytes(v)
+                    .map_err(|_| serde::de::Error::custom("deserialization error"));
+            }
+        }
 
-//         deserializer.deserialize_bytes(R1CSProofVisitor)
-//     }
-// }
+        deserializer.deserialize_bytes(R1CSProofVisitor)
+    }
+}
