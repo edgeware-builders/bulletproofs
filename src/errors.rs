@@ -2,6 +2,7 @@
 
 extern crate alloc;
 use alloc::vec::Vec;
+use alloc::string::String;
 
 #[cfg(feature = "std")]
 use thiserror::Error;
