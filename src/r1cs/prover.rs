@@ -169,8 +169,8 @@ impl<'t, 'g> ConstraintSystem for Prover<'t, 'g> {
 	}
 
 	fn constrain(&mut self, lc: LinearCombination) {
-		let res = self.evaluate_lc(&lc).unwrap();
-		assert!(res == Scalar::zero());
+		// let res = self.evaluate_lc(&lc).unwrap();
+		// assert!(res == Scalar::zero());
 		self.constraints.push(lc);
 	}
 
