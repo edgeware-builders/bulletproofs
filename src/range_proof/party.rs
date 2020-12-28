@@ -303,6 +303,32 @@ impl PartyAwaitingPolyChallenge {
             r_vec,
         })
     }
+
+    /// Apply challenge in the Zether scenario. We create a poly2 without
+    /// the first entry
+    pub fn apply_challenge_zether(self, pc: &PolyChallenge) -> Result<ProofShare, MPCError> {
+        // Prevent a malicious dealer from annihilating the blinding
+        // factors by supplying a zero challenge.
+        if pc.x == Scalar::zero() {
+            return Err(MPCError::MaliciousDealer);
+        }
+
+        let t_blinding_poly = util::Poly2(Scalar::zero(), self.t_1_blinding, self.t_2_blinding);
+
+        let t_x = self.t_poly.eval(pc.x);
+        let t_x_blinding = t_blinding_poly.eval(pc.x);
+        let e_blinding = self.a_blinding + self.s_blinding * &pc.x;
+        let l_vec = self.l_poly.eval(pc.x);
+        let r_vec = self.r_poly.eval(pc.x);
+
+        Ok(ProofShare {
+            t_x_blinding,
+            t_x,
+            e_blinding,
+            l_vec,
+            r_vec,
+        })
+    }
 }
 
 /// Overwrite secrets with null bytes when they go out of scope.

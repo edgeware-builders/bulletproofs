@@ -21,6 +21,15 @@ pub enum ProofError {
     /// factors does not match the number of values.
     #[cfg_attr(feature = "std", error("Wrong number of blinding factors supplied."))]
     WrongNumBlindingFactors,
+    /// This error occurs if one tries to generate a zether proof
+    /// for a number of values not equal to 2
+    #[cfg_attr(feature = "std", error("Wrong number of numbers for Zether proof"))]
+    WrongNumZetherProof,
+    /// This error occurs when attempting to create a batch proof
+    /// with different number of receipients public keys and
+    /// balance ciphertexts
+    #[cfg_attr(feature = "std", error("Wrong number of ciphertexts for Batch proof"))]
+    WrongNumCiphertextBatchProof,
     /// This error occurs when attempting to create a proof with
     /// bitsize other than \\(8\\), \\(16\\), \\(32\\), or \\(64\\).
     #[cfg_attr(feature = "std", error("Invalid bitsize, must have n = 8,16,32,64."))]
