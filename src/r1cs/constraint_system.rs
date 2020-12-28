@@ -73,7 +73,7 @@ pub trait ConstraintSystem {
 	/// ```text
 	/// lc = 0
 	/// ```
-	fn constrain(&mut self, lc: LinearCombination);
+	fn constrain(&mut self, lc: LinearCombination) -> Result<(), R1CSError>;
 
 	/// Evaluate a linear combination. Only prover can evaluate and return the scalar value, verifier returns None.
 	fn evaluate_lc(&self, lc: &LinearCombination) -> Option<Scalar>;

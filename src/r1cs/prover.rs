@@ -121,7 +121,7 @@ impl<'t, 'g> ConstraintSystem for Prover<'t, 'g> {
 		self.constrain(left)?;
 		self.constrain(right)?;
 
-		(l_var, r_var, o_var)
+		Ok((l_var, r_var, o_var))
 	}
 
 	fn allocate(&mut self, assignment: Option<Scalar>) -> Result<Variable, R1CSError> {
@@ -237,7 +237,7 @@ impl<'t, 'g> ConstraintSystem for RandomizingProver<'t, 'g> {
 		self.prover.multipliers_len()
 	}
 
-	fn constrain(&mut self, lc: LinearCombination) {
+	fn constrain(&mut self, lc: LinearCombination) -> Result<(), R1CSError> {
 		self.prover.constrain(lc)
 	}
 

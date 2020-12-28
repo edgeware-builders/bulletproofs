@@ -89,7 +89,7 @@ impl<'t> ConstraintSystem for Verifier<'t> {
 		self.constrain(left)?;
 		self.constrain(right)?;
 
-		(l_var, r_var, o_var)
+		Ok((l_var, r_var, o_var))
 	}
 
 	fn allocate(&mut self, _: Option<Scalar>) -> Result<Variable, R1CSError> {
@@ -136,23 +136,7 @@ impl<'t> ConstraintSystem for Verifier<'t> {
 	}
 
 	fn evaluate_lc(&self, lc: &LinearCombination) -> Option<Scalar> {
-		Ok(self.eval(lc))
-	}
-
-	fn eval(&self, lc: &LinearCombination) -> Scalar {
-		lc.terms
-			.iter()
-			.map(|(var, coeff)| {
-				coeff
-					* match var {
-						Variable::MultiplierLeft(i) => self.a_L[*i],
-						Variable::MultiplierRight(i) => self.a_R[*i],
-						Variable::MultiplierOutput(i) => self.a_O[*i],
-						Variable::Committed(i) => self.v[*i],
-						Variable::One() => Scalar::one(),
-					}
-			})
-			.sum()
+		Some(self.eval(lc))
 	}
 
 	fn allocate_single(
@@ -211,11 +195,11 @@ impl<'t> ConstraintSystem for RandomizingVerifier<'t> {
 		self.verifier.multipliers_len()
 	}
 
-	fn constrain(&mut self, lc: LinearCombination) {
+	fn constrain(&mut self, lc: LinearCombination) -> Result<(), R1CSError> {
 		self.verifier.constrain(lc)
 	}
 
-	fn evaluate_lc(&self, _: &LinearCombination) -> Option<Scalar> {
+	fn evaluate_lc(&self, lc: &LinearCombination) -> Option<Scalar> {
 		self.verifier.evaluate_lc(lc)
 	}
 
@@ -372,6 +356,22 @@ impl<'t> Verifier<'t> {
 			}
 			Ok(wrapped_self.verifier)
 		}
+	}
+
+	fn eval(&self, lc: &LinearCombination) -> Scalar {
+		lc.terms
+			.iter()
+			.map(|(var, coeff)| {
+				coeff
+					* match var {
+						Variable::MultiplierLeft(i) => self.w_L[*i],
+						Variable::MultiplierRight(i) => self.a_R[*i],
+						Variable::MultiplierOutput(i) => self.a_O[*i],
+						Variable::Committed(i) => self.v[*i],
+						Variable::One() => Scalar::one(),
+					}
+			})
+			.sum()
 	}
 
 	#[cfg(feature = "std")]
