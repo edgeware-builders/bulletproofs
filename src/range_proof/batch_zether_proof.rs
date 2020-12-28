@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 #![doc(include = "../../docs/range-proof-protocol.md")]
 
-use std::iter;
+use core::iter;
 
 use curve25519_dalek::ristretto::{CompressedRistretto, RistrettoPoint};
 use curve25519_dalek::scalar::Scalar;

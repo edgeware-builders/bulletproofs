@@ -2,6 +2,7 @@
 
 extern crate alloc;
 use alloc::vec::Vec;
+#[allow(unused_imports)]
 use alloc::string::String;
 
 #[cfg(feature = "std")]
