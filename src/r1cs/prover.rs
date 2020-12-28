@@ -100,7 +100,7 @@ impl<'t, 'g> ConstraintSystem for Prover<'t, 'g> {
 		&mut self,
 		mut left: LinearCombination,
 		mut right: LinearCombination,
-	) -> (Variable, Variable, Variable) {
+	) -> Result<(Variable, Variable, Variable), R1CSError> {
 		// Synthesize the assignments for l,r,o
 		let l = self.eval(&left);
 		let r = self.eval(&right);
@@ -118,8 +118,8 @@ impl<'t, 'g> ConstraintSystem for Prover<'t, 'g> {
 		// Constrain l,r,o:
 		left.terms.push((l_var, -Scalar::one()));
 		right.terms.push((r_var, -Scalar::one()));
-		self.constrain(left);
-		self.constrain(right);
+		self.constrain(left)?;
+		self.constrain(right)?;
 
 		(l_var, r_var, o_var)
 	}
@@ -168,10 +168,13 @@ impl<'t, 'g> ConstraintSystem for Prover<'t, 'g> {
 		self.a_L.len()
 	}
 
-	fn constrain(&mut self, lc: LinearCombination) {
-		// let res = self.evaluate_lc(&lc).unwrap();
-		// assert!(res == Scalar::zero());
+	fn constrain(&mut self, lc: LinearCombination) -> Result<(), R1CSError> {
+		let res = self.evaluate_lc(&lc).unwrap();
+		if res == Scalar::zero() {
+			return Err(R1CSError::ConstraintError);
+		}
 		self.constraints.push(lc);
+		Ok(())
 	}
 
 	fn evaluate_lc(&self, lc: &LinearCombination) -> Option<Scalar> {
@@ -215,7 +218,7 @@ impl<'t, 'g> ConstraintSystem for RandomizingProver<'t, 'g> {
 		&mut self,
 		left: LinearCombination,
 		right: LinearCombination,
-	) -> (Variable, Variable, Variable) {
+	) -> Result<(Variable, Variable, Variable), R1CSError> {
 		self.prover.multiply(left, right)
 	}
 

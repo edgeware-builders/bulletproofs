@@ -74,7 +74,7 @@ impl<'t> ConstraintSystem for Verifier<'t> {
 		&mut self,
 		mut left: LinearCombination,
 		mut right: LinearCombination,
-	) -> (Variable, Variable, Variable) {
+	) -> Result<(Variable, Variable, Variable), R1CSError> {
 		let var = self.num_vars;
 		self.num_vars += 1;
 
@@ -86,8 +86,8 @@ impl<'t> ConstraintSystem for Verifier<'t> {
 		// Constrain l,r,o:
 		left.terms.push((l_var, -Scalar::one()));
 		right.terms.push((r_var, -Scalar::one()));
-		self.constrain(left);
-		self.constrain(right);
+		self.constrain(left)?;
+		self.constrain(right)?;
 
 		(l_var, r_var, o_var)
 	}
@@ -126,15 +126,33 @@ impl<'t> ConstraintSystem for Verifier<'t> {
 		self.num_vars
 	}
 
-	fn constrain(&mut self, lc: LinearCombination) {
-		// TODO: check that the linear combinations are valid
-		// (e.g. that variables are valid, that the linear combination
-		// evals to 0 for prover, etc).
+	fn constrain(&mut self, lc: LinearCombination) -> Result<(), R1CSError> {
+		let res = self.evaluate_lc(&lc).unwrap();
+		if res == Scalar::zero() {
+			return Err(R1CSError::ConstraintError);
+		}
 		self.constraints.push(lc);
+		Ok(())
 	}
 
-	fn evaluate_lc(&self, _: &LinearCombination) -> Option<Scalar> {
-		None
+	fn evaluate_lc(&self, lc: &LinearCombination) -> Option<Scalar> {
+		Ok(self.eval(lc))
+	}
+
+	fn eval(&self, lc: &LinearCombination) -> Scalar {
+		lc.terms
+			.iter()
+			.map(|(var, coeff)| {
+				coeff
+					* match var {
+						Variable::MultiplierLeft(i) => self.a_L[*i],
+						Variable::MultiplierRight(i) => self.a_R[*i],
+						Variable::MultiplierOutput(i) => self.a_O[*i],
+						Variable::Committed(i) => self.v[*i],
+						Variable::One() => Scalar::one(),
+					}
+			})
+			.sum()
 	}
 
 	fn allocate_single(
@@ -174,7 +192,7 @@ impl<'t> ConstraintSystem for RandomizingVerifier<'t> {
 		&mut self,
 		left: LinearCombination,
 		right: LinearCombination,
-	) -> (Variable, Variable, Variable) {
+	) -> Result<(Variable, Variable, Variable), R1CSError> {
 		self.verifier.multiply(left, right)
 	}
 
@@ -198,7 +216,7 @@ impl<'t> ConstraintSystem for RandomizingVerifier<'t> {
 	}
 
 	fn evaluate_lc(&self, _: &LinearCombination) -> Option<Scalar> {
-		None
+		self.verifier.evaluate_lc(lc)
 	}
 
 	fn allocate_single(
