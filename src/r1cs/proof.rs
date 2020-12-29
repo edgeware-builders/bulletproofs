@@ -10,8 +10,10 @@ use crate::errors::R1CSError;
 use crate::inner_product_proof::InnerProductProof;
 use crate::util;
 
-// use serde::de::Visitor;
-// use serde::{self, Deserialize, Deserializer, Serialize, Serializer};
+#[cfg(feature = "std")]
+use serde::de::Visitor;
+#[cfg(feature = "std")]
+use serde::{self, Deserialize, Deserializer, Serialize, Serializer};
 
 const ONE_PHASE_COMMITMENTS: u8 = 0;
 const TWO_PHASE_COMMITMENTS: u8 = 1;
