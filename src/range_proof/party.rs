@@ -10,8 +10,6 @@
 //! modules orchestrate the protocol execution, see the documentation
 //! in the [`aggregation`](::range_proof_mpc) module.
 
-extern crate alloc;
-
 use alloc::vec::Vec;
 use clear_on_drop::clear::Clear;
 use core::iter;

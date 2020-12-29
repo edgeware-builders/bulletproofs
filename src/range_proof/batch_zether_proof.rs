@@ -14,7 +14,9 @@ use crate::inner_product_proof::InnerProductProof;
 use crate::transcript::TranscriptProtocol;
 use crate::util;
 
+#[cfg(feature = "std")]
 use serde::de::Visitor;
+#[cfg(feature = "std")]
 use serde::{self, Deserialize, Deserializer, Serialize, Serializer};
 
 // Modules for MPC protocol
@@ -402,7 +404,7 @@ impl BatchZetherProof {
     ///
     /// Returns an error if the byte slice cannot be parsed into a `RangeProof`.
     pub fn from_bytes(slice: &[u8]) -> Result<BatchZetherProof, ProofError> {
-        use std::convert::TryInto;
+        use core::convert::TryInto;
         if (slice.len() - 8) % 32 != 0 {
             return Err(ProofError::FormatError);
         }
@@ -465,6 +467,7 @@ impl BatchZetherProof {
     }
 }
 
+#[cfg(feature = "std")]
 impl Serialize for BatchZetherProof {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -474,6 +477,7 @@ impl Serialize for BatchZetherProof {
     }
 }
 
+#[cfg(feature = "std")]
 impl<'de> Deserialize<'de> for BatchZetherProof {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
