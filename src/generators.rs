@@ -129,6 +129,10 @@ impl Iterator for GeneratorsChain {
 /// chain, and even forward-compatible to multiparty aggregation of
 /// constraint system proofs, since the generators are namespaced by
 /// their party index.
+#[cfg_attr(
+    feature = "serde",
+    derive(serde_derive::Serialize, serde_derive::Deserialize)
+)]
 #[derive(Clone)]
 pub struct BulletproofGens {
     /// The maximum number of usable generators for each party.
