@@ -1,5 +1,5 @@
 [package]
-name = "bulletproofs"
+name = "webb-bulletproofs"
 # Before doing a release:
 # - update version field
 # - update html_root_url
@@ -8,10 +8,13 @@ name = "bulletproofs"
 version = "2.0.0"
 authors = ["Cathie Yun <cathieyun@gmail.com>",
            "Henry de Valence <hdevalence@hdevalence.ca>",
-           "Oleg Andreev <oleganza@gmail.com>"]
+           "Oleg Andreev <oleganza@gmail.com>",
+           "Drew Stone <drew@commonwealth.im>",
+           "Filip Lazovic <filip@commonwealth.im>",
+           "Shady Khalifa <shekohex@gmail.com>"]
 readme = "README.md"
 license = "MIT"
-repository = "https://github.com/dalek-cryptography/bulletproofs"
+repository = "https://github.com/webb-tools/bulletproofs"
 categories = ["cryptography"]
 keywords = ["cryptography", "crypto", "ristretto", "zero-knowledge", "bulletproofs"]
 description = "A pure-Rust implementation of Bulletproofs using Ristretto"
