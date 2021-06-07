@@ -13,12 +13,12 @@ mod util;
 
 #[doc(include = "../docs/notes-intro.md")]
 mod notes {
-    #[doc(include = "../docs/notes-ipp.md")]
-    mod inner_product_proof {}
-    #[doc(include = "../docs/notes-rp.md")]
-    mod range_proof {}
-    #[doc(include = "../docs/notes-r1cs.md")]
-    mod r1cs_proof {}
+	#[doc(include = "../docs/notes-ipp.md")]
+	mod inner_product_proof {}
+	#[doc(include = "../docs/notes-rp.md")]
+	mod range_proof {}
+	#[doc(include = "../docs/notes-r1cs.md")]
+	mod r1cs_proof {}
 }
 
 mod errors;
@@ -27,16 +27,18 @@ mod inner_product_proof;
 mod range_proof;
 mod transcript;
 
-pub use crate::errors::ProofError;
-pub use crate::generators::{BulletproofGens, BulletproofGensShare, PedersenGens};
-pub use crate::range_proof::RangeProof;
+pub use crate::{
+	errors::ProofError,
+	generators::{BulletproofGens, BulletproofGensShare, PedersenGens},
+	range_proof::RangeProof,
+};
 
 #[doc(include = "../docs/aggregation-api.md")]
 pub mod range_proof_mpc {
-    pub use crate::errors::MPCError;
-    pub use crate::range_proof::dealer;
-    pub use crate::range_proof::messages;
-    pub use crate::range_proof::party;
+	pub use crate::{
+		errors::MPCError,
+		range_proof::{dealer, messages, party},
+	};
 }
 
 #[cfg(feature = "yoloproofs")]
