@@ -3,15 +3,14 @@
 extern crate criterion;
 use criterion::Criterion;
 
-use rand;
 use rand::Rng;
 
 use curve25519_dalek::scalar::Scalar;
 
 use merlin::Transcript;
 
-use bulletproofs::RangeProof;
-use bulletproofs::{BulletproofGens, PedersenGens};
+use webb_bulletproofs::RangeProof;
+use webb_bulletproofs::{BulletproofGens, PedersenGens};
 
 static AGGREGATION_SIZES: [usize; 6] = [1, 2, 4, 8, 16, 32];
 

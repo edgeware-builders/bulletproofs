@@ -1,12 +1,12 @@
 #![allow(non_snake_case)]
-use bulletproofs::r1cs::*;
-use bulletproofs::{BulletproofGens, PedersenGens};
 use curve25519_dalek::ristretto::CompressedRistretto;
 use curve25519_dalek::scalar::Scalar;
 use merlin::Transcript;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use std::time::{Duration, Instant};
+use webb_bulletproofs::r1cs::*;
+use webb_bulletproofs::{BulletproofGens, PedersenGens};
 
 // Shuffle gadget (documented in markdown file)
 
@@ -97,7 +97,11 @@ impl ShuffleProof {
             .unzip();
 
         ShuffleProof::gadget(&mut prover, input_vars, output_vars)?;
-        println!("For constraints {} and multipliers {} ", &prover.num_constraints(), &prover.num_multipliers());
+        println!(
+            "For constraints {} and multipliers {} ",
+            &prover.num_constraints(),
+            &prover.num_multipliers()
+        );
         let proof = prover.prove(&bp_gens)?;
         Ok((ShuffleProof(proof), input_commitments, output_commitments))
     }
@@ -156,7 +160,8 @@ fn kshuffle_helper(k: usize) {
 
         let mut prover_transcript = Transcript::new(b"ShuffleProofTest");
         let start = Instant::now();
-        let r = ShuffleProof::prove(&pc_gens, &bp_gens, &mut prover_transcript, &input, &output).unwrap();
+        let r = ShuffleProof::prove(&pc_gens, &bp_gens, &mut prover_transcript, &input, &output)
+            .unwrap();
         let end = start.elapsed();
         println!("Proving time for {} is {:?}", &input.len(), end);
         r
@@ -175,7 +180,11 @@ fn kshuffle_helper(k: usize) {
             )
             .is_ok());
         let end = start.elapsed();
-        println!("Verification time for {} is {:?}", input_commitments.len(), end);
+        println!(
+            "Verification time for {} is {:?}",
+            input_commitments.len(),
+            end
+        );
     }
 }
 

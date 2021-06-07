@@ -514,8 +514,8 @@ impl RangeProof {
 
         use crate::util::read32;
 
-        let A = CompressedRistretto(read32(&slice[0 * 32..]));
-        let S = CompressedRistretto(read32(&slice[1 * 32..]));
+        let A = CompressedRistretto(read32(&slice[0..]));
+        let S = CompressedRistretto(read32(&slice[32..]));
         let T_1 = CompressedRistretto(read32(&slice[2 * 32..]));
         let T_2 = CompressedRistretto(read32(&slice[3 * 32..]));
 

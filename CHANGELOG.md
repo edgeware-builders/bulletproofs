@@ -2,6 +2,9 @@
 
 Entries are listed in reverse chronological order.
 
+## 2.0.1
+* Remove `try_trait` and target the latest nightly rust version (v1.54)
+
 ## 2.0.0
 
 * Switch from `failure` to `std`-compatible errors via `thiserror`.

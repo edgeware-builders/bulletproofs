@@ -13,18 +13,18 @@ use criterion::Criterion;
 // someone wants to figure a way to use #[path] attributes or
 // something to avoid the duplication.
 
-extern crate bulletproofs;
 extern crate curve25519_dalek;
 extern crate merlin;
 extern crate rand;
+extern crate webb_bulletproofs;
 
-use bulletproofs::r1cs::*;
-use bulletproofs::{BulletproofGens, PedersenGens};
 use curve25519_dalek::ristretto::CompressedRistretto;
 use curve25519_dalek::scalar::Scalar;
 use merlin::Transcript;
 use rand::seq::SliceRandom;
 use rand::Rng;
+use webb_bulletproofs::r1cs::*;
+use webb_bulletproofs::{BulletproofGens, PedersenGens};
 
 // Shuffle gadget (documented in markdown file)
 
