@@ -1,33 +1,35 @@
 #![allow(non_snake_case)]
 
-use alloc::boxed::Box;
-use alloc::vec::Vec;
+use alloc::{boxed::Box, vec::Vec};
 use clear_on_drop::clear::Clear;
 use core::mem;
-use curve25519_dalek::ristretto::{CompressedRistretto, RistrettoPoint};
-use curve25519_dalek::scalar::Scalar;
-use curve25519_dalek::traits::{Identity, MultiscalarMul};
+use curve25519_dalek::{
+	ristretto::{CompressedRistretto, RistrettoPoint},
+	scalar::Scalar,
+	traits::{Identity, MultiscalarMul},
+};
 use merlin::Transcript;
 use rand_core::{CryptoRng, RngCore};
 
 use super::{
-	ConstraintSystem, LinearCombination, R1CSProof, RandomizableConstraintSystem,
-	RandomizedConstraintSystem, Variable,
+	ConstraintSystem, LinearCombination, R1CSProof, RandomizableConstraintSystem, RandomizedConstraintSystem, Variable,
 };
 
-use crate::errors::R1CSError;
-use crate::generators::{BulletproofGens, PedersenGens};
-use crate::inner_product_proof::InnerProductProof;
-use crate::transcript::TranscriptProtocol;
+use crate::{
+	errors::R1CSError,
+	generators::{BulletproofGens, PedersenGens},
+	inner_product_proof::InnerProductProof,
+	transcript::TranscriptProtocol,
+};
 
 #[cfg(feature = "std")]
 use rand::thread_rng;
 
 /// A [`ConstraintSystem`] implementation for use by the prover.
 ///
-/// The prover commits high-level variables and their blinding factors `(v, v_blinding)`,
-/// allocates low-level variables and creates constraints in terms of these
-/// high-level variables and low-level variables.
+/// The prover commits high-level variables and their blinding factors `(v,
+/// v_blinding)`, allocates low-level variables and creates constraints in terms
+/// of these high-level variables and low-level variables.
 ///
 /// When all constraints are added, the proving code calls `prove`
 /// which consumes the `Prover` instance, samples random challenges
@@ -48,8 +50,8 @@ pub struct Prover<'t, 'g> {
 	/// High-level witness data (blinding openings to V commitments)
 	v_blinding: Vec<Scalar>,
 
-	/// This list holds closures that will be called in the second phase of the protocol,
-	/// when non-randomized variables are committed.
+	/// This list holds closures that will be called in the second phase of the
+	/// protocol, when non-randomized variables are committed.
 	deferred_constraints: Vec<Box<dyn Fn(&mut RandomizingProver<'t, 'g>) -> Result<(), R1CSError>>>,
 
 	/// Index of a pending multiplier that's not fully assigned yet.
@@ -58,11 +60,12 @@ pub struct Prover<'t, 'g> {
 
 /// Prover in the randomizing phase.
 ///
-/// Note: this type is exported because it is used to specify the associated type
-/// in the public impl of a trait `ConstraintSystem`, which boils down to allowing compiler to
-/// monomorphize the closures for the proving and verifying code.
-/// However, this type cannot be instantiated by the user and therefore can only be used within
-/// the callback provided to `specify_randomized_constraints`.
+/// Note: this type is exported because it is used to specify the associated
+/// type in the public impl of a trait `ConstraintSystem`, which boils down to
+/// allowing compiler to monomorphize the closures for the proving and verifying
+/// code. However, this type cannot be instantiated by the user and therefore
+/// can only be used within the callback provided to
+/// `specify_randomized_constraints`.
 pub struct RandomizingProver<'t, 'g> {
 	prover: Prover<'t, 'g>,
 }
@@ -77,7 +80,8 @@ impl<'t, 'g> Drop for Prover<'t, 'g> {
 		// for T: Default, calling .clear() on Vec compiles, but does not
 		// clear the content. Instead, it only clears the Vec's header.
 		// Clearing the underlying buffer item-by-item will do the job, but will
-		// keep the header as-is, which is fine since the header does not contain secrets.
+		// keep the header as-is, which is fine since the header does not contain
+		// secrets.
 		for e in self.a_L.iter_mut() {
 			e.clear();
 		}
@@ -178,17 +182,11 @@ impl<'t, 'g> ConstraintSystem for Prover<'t, 'g> {
 		Some(self.eval(lc))
 	}
 
-	fn allocate_single(
-		&mut self,
-		assignment: Option<Scalar>,
-	) -> Result<(Variable, Option<Variable>), R1CSError> {
+	fn allocate_single(&mut self, assignment: Option<Scalar>) -> Result<(Variable, Option<Variable>), R1CSError> {
 		let var = self.allocate(assignment)?;
 		match var {
 			Variable::MultiplierLeft(i) => Ok((Variable::MultiplierLeft(i), None)),
-			Variable::MultiplierRight(i) => Ok((
-				Variable::MultiplierRight(i),
-				Some(Variable::MultiplierOutput(i)),
-			)),
+			Variable::MultiplierRight(i) => Ok((Variable::MultiplierRight(i), Some(Variable::MultiplierOutput(i)))),
 			_ => Err(R1CSError::FormatError),
 		}
 	}
@@ -211,11 +209,7 @@ impl<'t, 'g> ConstraintSystem for RandomizingProver<'t, 'g> {
 		self.prover.transcript
 	}
 
-	fn multiply(
-		&mut self,
-		left: LinearCombination,
-		right: LinearCombination,
-	) -> (Variable, Variable, Variable) {
+	fn multiply(&mut self, left: LinearCombination, right: LinearCombination) -> (Variable, Variable, Variable) {
 		self.prover.multiply(left, right)
 	}
 
@@ -242,10 +236,7 @@ impl<'t, 'g> ConstraintSystem for RandomizingProver<'t, 'g> {
 		self.prover.evaluate_lc(lc)
 	}
 
-	fn allocate_single(
-		&mut self,
-		assignment: Option<Scalar>,
-	) -> Result<(Variable, Option<Variable>), R1CSError> {
+	fn allocate_single(&mut self, assignment: Option<Scalar>) -> Result<(Variable, Option<Variable>), R1CSError> {
 		self.prover.allocate_single(assignment)
 	}
 }
@@ -294,7 +285,8 @@ impl<'t, 'g> Prover<'t, 'g> {
 		}
 	}
 
-	/// Creates commitment to a high-level variable and adds it to the transcript.
+	/// Creates commitment to a high-level variable and adds it to the
+	/// transcript.
 	///
 	/// # Inputs
 	///
@@ -309,8 +301,9 @@ impl<'t, 'g> Prover<'t, 'g> {
 	///
 	/// # Returns
 	///
-	/// Returns a pair of a Pedersen commitment (as a compressed Ristretto point),
-	/// and a [`Variable`] corresponding to it, which can be used to form constraints.
+	/// Returns a pair of a Pedersen commitment (as a compressed Ristretto
+	/// point), and a [`Variable`] corresponding to it, which can be used to
+	/// form constraints.
 	pub fn commit(&mut self, v: Scalar, v_blinding: Scalar) -> (CompressedRistretto, Variable) {
 		let i = self.v.len();
 		self.v.push(v);
@@ -334,10 +327,7 @@ impl<'t, 'g> Prover<'t, 'g> {
 	/// (wL, wR, wO, wV)
 	/// ```
 	/// where `w{L,R,O}` is \\( z \cdot z^Q \cdot W_{L,R,O} \\).
-	fn flattened_constraints(
-		&mut self,
-		z: &Scalar,
-	) -> (Vec<Scalar>, Vec<Scalar>, Vec<Scalar>, Vec<Scalar>) {
+	fn flattened_constraints(&mut self, z: &Scalar) -> (Vec<Scalar>, Vec<Scalar>, Vec<Scalar>, Vec<Scalar>) {
 		let n = self.a_L.len();
 		let m = self.v.len();
 
@@ -392,7 +382,8 @@ impl<'t, 'g> Prover<'t, 'g> {
 	/// Calls all remembered callbacks with an API that
 	/// allows generating challenge scalars.
 	fn create_randomized_constraints(mut self) -> Result<Self, R1CSError> {
-		// Clear the pending multiplier (if any) because it was committed into A_L/A_R/S.
+		// Clear the pending multiplier (if any) because it was committed into
+		// A_L/A_R/S.
 		self.pending_multiplier = None;
 
 		if self.deferred_constraints.len() == 0 {
@@ -476,12 +467,8 @@ impl<'t, 'g> Prover<'t, 'g> {
 
 		// A_I = <a_L, G> + <a_R, H> + i_blinding * B_blinding
 		let A_I1 = RistrettoPoint::multiscalar_mul(
-			iter::once(&i_blinding1)
-				.chain(self.a_L.iter())
-				.chain(self.a_R.iter()),
-			iter::once(&self.pc_gens.B_blinding)
-				.chain(gens.G(n1))
-				.chain(gens.H(n1)),
+			iter::once(&i_blinding1).chain(self.a_L.iter()).chain(self.a_R.iter()),
+			iter::once(&self.pc_gens.B_blinding).chain(gens.G(n1)).chain(gens.H(n1)),
 		)
 		.compress();
 
@@ -494,12 +481,8 @@ impl<'t, 'g> Prover<'t, 'g> {
 
 		// S = <s_L, G> + <s_R, H> + s_blinding * B_blinding
 		let S1 = RistrettoPoint::multiscalar_mul(
-			iter::once(&s_blinding1)
-				.chain(s_L1.iter())
-				.chain(s_R1.iter()),
-			iter::once(&self.pc_gens.B_blinding)
-				.chain(gens.G(n1))
-				.chain(gens.H(n1)),
+			iter::once(&s_blinding1).chain(s_L1.iter()).chain(s_R1.iter()),
+			iter::once(&self.pc_gens.B_blinding).chain(gens.G(n1)).chain(gens.H(n1)),
 		)
 		.compress();
 
@@ -510,9 +493,11 @@ impl<'t, 'g> Prover<'t, 'g> {
 		// Process the remaining constraints.
 		self = self.create_randomized_constraints()?;
 
-		// Pad zeros to the next power of two (or do that implicitly when creating vectors)
+		// Pad zeros to the next power of two (or do that implicitly when creating
+		// vectors)
 
-		// If the number of multiplications is not 0 or a power of 2, then pad the circuit.
+		// If the number of multiplications is not 0 or a power of 2, then pad the
+		// circuit.
 		let n = self.a_L.len();
 		let n2 = n - n1;
 		let padded_n = self.a_L.len().next_power_of_two();
@@ -559,9 +544,7 @@ impl<'t, 'g> Prover<'t, 'g> {
 				.compress(),
 				// S = <s_L, G> + <s_R, H> + s_blinding * B_blinding
 				RistrettoPoint::multiscalar_mul(
-					iter::once(&s_blinding2)
-						.chain(s_L2.iter())
-						.chain(s_R2.iter()),
+					iter::once(&s_blinding2).chain(s_L2.iter()).chain(s_R2.iter()),
 					iter::once(&self.pc_gens.B_blinding)
 						.chain(gens.G(n).skip(n1))
 						.chain(gens.H(n).skip(n1)),
@@ -598,10 +581,7 @@ impl<'t, 'g> Prover<'t, 'g> {
 		let y_inv = y.invert();
 		let exp_y_inv = util::exp_iter(y_inv).take(padded_n).collect::<Vec<_>>();
 
-		let sLsR = s_L1
-			.iter()
-			.chain(s_L2.iter())
-			.zip(s_R1.iter().chain(s_R2.iter()));
+		let sLsR = s_L1.iter().chain(s_L2.iter()).zip(s_R1.iter().chain(s_R2.iter()));
 		for (i, (sl, sr)) in sLsR.enumerate() {
 			// l_poly.0 = 0
 			// l_poly.1 = a_L + y^-n * (z * z^Q * W_R)
@@ -682,8 +662,7 @@ impl<'t, 'g> Prover<'t, 'g> {
 		let e_blinding = x * (i_blinding + x * (o_blinding + x * s_blinding));
 
 		self.transcript.append_scalar(b"t_x", &t_x);
-		self.transcript
-			.append_scalar(b"t_x_blinding", &t_x_blinding);
+		self.transcript.append_scalar(b"t_x_blinding", &t_x_blinding);
 		self.transcript.append_scalar(b"e_blinding", &e_blinding);
 
 		// Get a challenge value to combine statements for the IPP
@@ -712,8 +691,8 @@ impl<'t, 'g> Prover<'t, 'g> {
 		);
 
 		// We do not yet have a ClearOnDrop wrapper for Vec<Scalar>.
-		// When PR 202 [1] is merged, we can simply wrap s_L and s_R at the point of creation.
-		// [1] https://github.com/dalek-cryptography/curve25519-dalek/pull/202
+		// When PR 202 [1] is merged, we can simply wrap s_L and s_R at the point of
+		// creation. [1] https://github.com/dalek-cryptography/curve25519-dalek/pull/202
 		for scalar in s_L1
 			.iter_mut()
 			.chain(s_L2.iter_mut())

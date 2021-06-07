@@ -1,11 +1,12 @@
 #![allow(non_snake_case)]
 
-use alloc::boxed::Box;
-use alloc::vec::Vec;
+use alloc::{boxed::Box, vec::Vec};
 use core::mem;
-use curve25519_dalek::ristretto::{CompressedRistretto, RistrettoPoint};
-use curve25519_dalek::scalar::Scalar;
-use curve25519_dalek::traits::VartimeMultiscalarMul;
+use curve25519_dalek::{
+	ristretto::{CompressedRistretto, RistrettoPoint},
+	scalar::Scalar,
+	traits::VartimeMultiscalarMul,
+};
 use merlin::Transcript;
 use rand_core::{CryptoRng, RngCore};
 
@@ -13,13 +14,14 @@ use rand_core::{CryptoRng, RngCore};
 use rand::thread_rng;
 
 use super::{
-	ConstraintSystem, LinearCombination, R1CSProof, RandomizableConstraintSystem,
-	RandomizedConstraintSystem, Variable,
+	ConstraintSystem, LinearCombination, R1CSProof, RandomizableConstraintSystem, RandomizedConstraintSystem, Variable,
 };
 
-use crate::errors::R1CSError;
-use crate::generators::{BulletproofGens, PedersenGens};
-use crate::transcript::TranscriptProtocol;
+use crate::{
+	errors::R1CSError,
+	generators::{BulletproofGens, PedersenGens},
+	transcript::TranscriptProtocol,
+};
 
 /// A [`ConstraintSystem`] implementation for use by the verifier.
 ///
@@ -44,10 +46,10 @@ pub struct Verifier<'t> {
 	num_vars: usize,
 	V: Vec<CompressedRistretto>,
 
-	/// This list holds closures that will be called in the second phase of the protocol,
-	/// when non-randomized variables are committed.
-	/// After that, the option will flip to None and additional calls to `randomize_constraints`
-	/// will invoke closures immediately.
+	/// This list holds closures that will be called in the second phase of the
+	/// protocol, when non-randomized variables are committed.
+	/// After that, the option will flip to None and additional calls to
+	/// `randomize_constraints` will invoke closures immediately.
 	deferred_constraints: Vec<Box<dyn Fn(&mut RandomizingVerifier<'t>) -> Result<(), R1CSError>>>,
 
 	/// Index of a pending multiplier that's not fully assigned yet.
@@ -56,11 +58,12 @@ pub struct Verifier<'t> {
 
 /// Verifier in the randomizing phase.
 ///
-/// Note: this type is exported because it is used to specify the associated type
-/// in the public impl of a trait `ConstraintSystem`, which boils down to allowing compiler to
-/// monomorphize the closures for the proving and verifying code.
-/// However, this type cannot be instantiated by the user and therefore can only be used within
-/// the callback provided to `specify_randomized_constraints`.
+/// Note: this type is exported because it is used to specify the associated
+/// type in the public impl of a trait `ConstraintSystem`, which boils down to
+/// allowing compiler to monomorphize the closures for the proving and verifying
+/// code. However, this type cannot be instantiated by the user and therefore
+/// can only be used within the callback provided to
+/// `specify_randomized_constraints`.
 pub struct RandomizingVerifier<'t> {
 	verifier: Verifier<'t>,
 }
@@ -137,17 +140,11 @@ impl<'t> ConstraintSystem for Verifier<'t> {
 		None
 	}
 
-	fn allocate_single(
-		&mut self,
-		_: Option<Scalar>,
-	) -> Result<(Variable, Option<Variable>), R1CSError> {
+	fn allocate_single(&mut self, _: Option<Scalar>) -> Result<(Variable, Option<Variable>), R1CSError> {
 		let var = self.allocate(None)?;
 		match var {
 			Variable::MultiplierLeft(i) => Ok((Variable::MultiplierLeft(i), None)),
-			Variable::MultiplierRight(i) => Ok((
-				Variable::MultiplierRight(i),
-				Some(Variable::MultiplierOutput(i)),
-			)),
+			Variable::MultiplierRight(i) => Ok((Variable::MultiplierRight(i), Some(Variable::MultiplierOutput(i)))),
 			_ => Err(R1CSError::FormatError),
 		}
 	}
@@ -170,11 +167,7 @@ impl<'t> ConstraintSystem for RandomizingVerifier<'t> {
 		self.verifier.transcript
 	}
 
-	fn multiply(
-		&mut self,
-		left: LinearCombination,
-		right: LinearCombination,
-	) -> (Variable, Variable, Variable) {
+	fn multiply(&mut self, left: LinearCombination, right: LinearCombination) -> (Variable, Variable, Variable) {
 		self.verifier.multiply(left, right)
 	}
 
@@ -201,10 +194,7 @@ impl<'t> ConstraintSystem for RandomizingVerifier<'t> {
 		None
 	}
 
-	fn allocate_single(
-		&mut self,
-		_: Option<Scalar>,
-	) -> Result<(Variable, Option<Variable>), R1CSError> {
+	fn allocate_single(&mut self, _: Option<Scalar>) -> Result<(Variable, Option<Variable>), R1CSError> {
 		self.verifier.allocate_single(None)
 	}
 }
@@ -254,7 +244,8 @@ impl<'t> Verifier<'t> {
 		}
 	}
 
-	/// Creates commitment to a high-level variable and adds it to the transcript.
+	/// Creates commitment to a high-level variable and adds it to the
+	/// transcript.
 	///
 	/// # Inputs
 	///
@@ -266,8 +257,9 @@ impl<'t> Verifier<'t> {
 	///
 	/// # Returns
 	///
-	/// Returns a pair of a Pedersen commitment (as a compressed Ristretto point),
-	/// and a [`Variable`] corresponding to it, which can be used to form constraints.
+	/// Returns a pair of a Pedersen commitment (as a compressed Ristretto
+	/// point), and a [`Variable`] corresponding to it, which can be used to
+	/// form constraints.
 	pub fn commit(&mut self, commitment: CompressedRistretto) -> Variable {
 		let i = self.V.len();
 		self.V.push(commitment);
@@ -293,10 +285,7 @@ impl<'t> Verifier<'t> {
 	/// This has the same logic as `ProverCS::flattened_constraints()`
 	/// but also computes the constant terms (which the prover skips
 	/// because they're not needed to construct the proof).
-	fn flattened_constraints(
-		&mut self,
-		z: &Scalar,
-	) -> (Vec<Scalar>, Vec<Scalar>, Vec<Scalar>, Vec<Scalar>, Scalar) {
+	fn flattened_constraints(&mut self, z: &Scalar) -> (Vec<Scalar>, Vec<Scalar>, Vec<Scalar>, Vec<Scalar>, Scalar) {
 		let n = self.num_vars;
 		let m = self.V.len();
 
@@ -336,7 +325,8 @@ impl<'t> Verifier<'t> {
 	/// Calls all remembered callbacks with an API that
 	/// allows generating challenge scalars.
 	fn create_randomized_constraints(mut self) -> Result<Self, R1CSError> {
-		// Clear the pending multiplier (if any) because it was committed into A_L/A_R/S.
+		// Clear the pending multiplier (if any) because it was committed into
+		// A_L/A_R/S.
 		self.pending_multiplier = None;
 
 		if self.deferred_constraints.len() == 0 {
@@ -386,24 +376,21 @@ impl<'t> Verifier<'t> {
 		self.transcript.append_u64(b"m", self.V.len() as u64);
 
 		let n1 = self.num_vars;
-		self.transcript
-			.validate_and_append_point(b"A_I1", &proof.A_I1)?;
-		self.transcript
-			.validate_and_append_point(b"A_O1", &proof.A_O1)?;
-		self.transcript
-			.validate_and_append_point(b"S1", &proof.S1)?;
+		self.transcript.validate_and_append_point(b"A_I1", &proof.A_I1)?;
+		self.transcript.validate_and_append_point(b"A_O1", &proof.A_O1)?;
+		self.transcript.validate_and_append_point(b"S1", &proof.S1)?;
 
 		// Process the remaining constraints.
 		self = self.create_randomized_constraints()?;
 
-		// If the number of multiplications is not 0 or a power of 2, then pad the circuit.
+		// If the number of multiplications is not 0 or a power of 2, then pad the
+		// circuit.
 		let n = self.num_vars;
 		let n2 = n - n1;
 		let padded_n = self.num_vars.next_power_of_two();
 		let pad = padded_n - n;
 
-		use crate::inner_product_proof::inner_product;
-		use crate::util;
+		use crate::{inner_product_proof::inner_product, util};
 		use core::iter;
 
 		if bp_gens.gens_capacity < padded_n {
@@ -420,25 +407,18 @@ impl<'t> Verifier<'t> {
 		let y = self.transcript.challenge_scalar(b"y");
 		let z = self.transcript.challenge_scalar(b"z");
 
-		self.transcript
-			.validate_and_append_point(b"T_1", &proof.T_1)?;
-		self.transcript
-			.validate_and_append_point(b"T_3", &proof.T_3)?;
-		self.transcript
-			.validate_and_append_point(b"T_4", &proof.T_4)?;
-		self.transcript
-			.validate_and_append_point(b"T_5", &proof.T_5)?;
-		self.transcript
-			.validate_and_append_point(b"T_6", &proof.T_6)?;
+		self.transcript.validate_and_append_point(b"T_1", &proof.T_1)?;
+		self.transcript.validate_and_append_point(b"T_3", &proof.T_3)?;
+		self.transcript.validate_and_append_point(b"T_4", &proof.T_4)?;
+		self.transcript.validate_and_append_point(b"T_5", &proof.T_5)?;
+		self.transcript.validate_and_append_point(b"T_6", &proof.T_6)?;
 
 		let u = self.transcript.challenge_scalar(b"u");
 		let x = self.transcript.challenge_scalar(b"x");
 
 		self.transcript.append_scalar(b"t_x", &proof.t_x);
-		self.transcript
-			.append_scalar(b"t_x_blinding", &proof.t_x_blinding);
-		self.transcript
-			.append_scalar(b"e_blinding", &proof.e_blinding);
+		self.transcript.append_scalar(b"t_x_blinding", &proof.t_x_blinding);
+		self.transcript.append_scalar(b"e_blinding", &proof.e_blinding);
 
 		let w = self.transcript.challenge_scalar(b"w");
 
@@ -454,9 +434,7 @@ impl<'t> Verifier<'t> {
 		let b = proof.ipp_proof.b;
 
 		let y_inv = y.invert();
-		let y_inv_vec = util::exp_iter(y_inv)
-			.take(padded_n)
-			.collect::<Vec<Scalar>>();
+		let y_inv_vec = util::exp_iter(y_inv).take(padded_n).collect::<Vec<Scalar>>();
 		let yneg_wR = wR
 			.into_iter()
 			.zip(y_inv_vec.iter())

@@ -2,8 +2,7 @@ use rand_core::SeedableRng;
 
 use rand_chacha::ChaChaRng;
 
-use curve25519_dalek::ristretto::CompressedRistretto;
-use curve25519_dalek::scalar::Scalar;
+use curve25519_dalek::{ristretto::CompressedRistretto, scalar::Scalar};
 
 use merlin::Transcript;
 
@@ -12,8 +11,8 @@ use webb_bulletproofs::{BulletproofGens, PedersenGens, RangeProof};
 // Tests that proofs generated with v1.0.0 continue to verify in later versions.
 #[test]
 fn deserialize_and_verify() {
-    // proofs[i][j] has bitsize n = 8 << i, aggregation size m = 1 << j
-    let proofs = [
+	// proofs[i][j] has bitsize n = 8 << i, aggregation size m = 1 << j
+	let proofs = [
         [
             b"46b6ea8b6a9710c41c2622d4b353dbcf5f89afe8ed66c469f192bec19dc71d23c0442827f97fc9085a89caa87d294b0a21e7b8957732ec4951f6bf7d3aa2c66e7af3b7b956c7dcb3bed1223575a217a30642b603b6bf1d4138ed95e3458c524510b42c8d82958f40b447a84242b1ba1eeea54013f80bad643048eeb0b17c292a057cb6ae1c42338837c05eaa6336a17d60fa141204e015a1df15b28c1318c709d7eb35569cde89c0bf37eace54880a151498b38da54c6d739564f46f01b73601e518355ea06c9ef58a45fcb3baadbd1ac54e0838c471a6b91845f123d569fa0c46ef94471b7b826230e8576146beec08ac3e6683998815c576581f4c0e493433480f95f6495210636eaa2e32b577e1c363e35e522db85b18a56d57eb626f9e2b50578e0d7ee7b74b328e158b366bb9d117db725820a2fec3b1508212d75823345a801c0b602bfa05919d7e3bb8e71944587072badc363f334b08ba90d13e077ad24b82bacd51fc668d2b880daabd3b87e6bdc9584af66523026a30aadfc359283891bb65cca502f47421ffeee1fb5a5237bfa965b66a8b8ca5d6954f4f8222244c6a5340dc81e8d781d092cae2a763f185dd0b89965b1dd2506807b5d3e5a305fd9a68e60b91389dcffae6f85538713aa7ed272b8174e2f0b9730ebb6c464d06".to_vec(),
             b"96cb7f843c95f494b5b97d74d29ad855eda25a9b09a51c04275d5f79b988055dee65c2accc2d77f281ff9e1933a470f40d467ae7a557e922a6d0cf07db09e3655a7d82cfe9262b7ad49953b765f0e85ff71730526d43b902b9e50e88f1b13a1ca0fed50530b4a22307a4eebf2d49127f1899a5b6b0b68f25d078972ec53a555fa371422ef112b34b08d45c37cca5bd6039f7644162e073918502a0585f9e3803e59f6e6b1646e38716a0704b8232f397c9ee6222a971dec8b8518b5dc6101308e188f22a47baf5139d069183a657287cabfe744e7f4871676d5b85321374710fd4f69cd96053c09ee529fe1e235765d3410593c7b8caff21c13d8efb175f540306bf4a841d05a2f78dae3e2382d4d0662f15f282b47a435a2b1d3f9bcaff0d14a4d44ba466ea0e63664656e715d60b42866626cd3a039d08c6428b3c4f60106610d97ead55e1af253353ddb313c65b4a6dd65ec4555c62dde57653db51db111ef42cfb0bf7621e14509634d3616ec9b46a12ab2b187668a6207a4838d04e0b01aca5f4002ee00a901319d876ab8ebb6619c81f2afc2016e48b7e1cf14577af1abccea0100f3ee10cbc1b2ea5f46e0a4a25519f5c58ef15c2c38549e9240a615fc87210c68e6128476cb02dd5ce2b8fdbd407f23013ed1ab3fa86ff441788b31ab5375e5442e825ecf5d7f3060e3b2bbf96074f5dc121ec6f3460d8d27f2e4101f5d910181c6012f6345da390055929f6c6ba243b6f8ef2a1a62c49e9ae036703".to_vec(),
@@ -40,56 +39,48 @@ fn deserialize_and_verify() {
         ],
     ];
 
-    let vc = [
-        CompressedRistretto::from_slice(
-            &hex::decode("90b0c2fe57934dff9f5396e135e7d72b82b3c5393e1843178918eb2cf28a5f3c")
-                .unwrap(),
-        ),
-        CompressedRistretto::from_slice(
-            &hex::decode("74256a3e2a7fe948210c4095195ae4db3e3498c6c5fddc2afb226c0f1e97e468")
-                .unwrap(),
-        ),
-        CompressedRistretto::from_slice(
-            &hex::decode("7e348def6d03dc7bcbe7e03736ca2898e2efa9f6ff8ae4ed1cb5252ec1744075")
-                .unwrap(),
-        ),
-        CompressedRistretto::from_slice(
-            &hex::decode("861859f5d4c14f5d6d7ad88dcf43c9a98064a7d8702ffc9bad9eba2ed766702a")
-                .unwrap(),
-        ),
-        CompressedRistretto::from_slice(
-            &hex::decode("4c09b1260c833fefe25b1c3d3becc80979beca5e864d57fcb410bb15c7ba5c14")
-                .unwrap(),
-        ),
-        CompressedRistretto::from_slice(
-            &hex::decode("08cf26bfdf2e6b731536f5e48b4c0ac7b5fc846d36aaa3fe0d28f07c207f0814")
-                .unwrap(),
-        ),
-        CompressedRistretto::from_slice(
-            &hex::decode("a6e2d1c2770333c9a8a5ac10d9eb28e8609d5954428261335b2fd6ff0e0e8d69")
-                .unwrap(),
-        ),
-        CompressedRistretto::from_slice(
-            &hex::decode("30beef3b58fd2c18dde771d5c77e32f8dc01361e284aef517bce54a5c74c4665")
-                .unwrap(),
-        ),
-    ];
+	let vc = [
+		CompressedRistretto::from_slice(
+			&hex::decode("90b0c2fe57934dff9f5396e135e7d72b82b3c5393e1843178918eb2cf28a5f3c").unwrap(),
+		),
+		CompressedRistretto::from_slice(
+			&hex::decode("74256a3e2a7fe948210c4095195ae4db3e3498c6c5fddc2afb226c0f1e97e468").unwrap(),
+		),
+		CompressedRistretto::from_slice(
+			&hex::decode("7e348def6d03dc7bcbe7e03736ca2898e2efa9f6ff8ae4ed1cb5252ec1744075").unwrap(),
+		),
+		CompressedRistretto::from_slice(
+			&hex::decode("861859f5d4c14f5d6d7ad88dcf43c9a98064a7d8702ffc9bad9eba2ed766702a").unwrap(),
+		),
+		CompressedRistretto::from_slice(
+			&hex::decode("4c09b1260c833fefe25b1c3d3becc80979beca5e864d57fcb410bb15c7ba5c14").unwrap(),
+		),
+		CompressedRistretto::from_slice(
+			&hex::decode("08cf26bfdf2e6b731536f5e48b4c0ac7b5fc846d36aaa3fe0d28f07c207f0814").unwrap(),
+		),
+		CompressedRistretto::from_slice(
+			&hex::decode("a6e2d1c2770333c9a8a5ac10d9eb28e8609d5954428261335b2fd6ff0e0e8d69").unwrap(),
+		),
+		CompressedRistretto::from_slice(
+			&hex::decode("30beef3b58fd2c18dde771d5c77e32f8dc01361e284aef517bce54a5c74c4665").unwrap(),
+		),
+	];
 
-    let pc_gens = PedersenGens::default();
-    let bp_gens = BulletproofGens::new(64, 8);
+	let pc_gens = PedersenGens::default();
+	let bp_gens = BulletproofGens::new(64, 8);
 
-    for i in 0..4 {
-        for j in 0..4 {
-            let (n, m) = (8 << i, 1 << j);
-            let proof = RangeProof::from_bytes(&hex::decode(&proofs[i][j]).unwrap())
-                .expect("Rangeproof deserialization failed");
-            let mut transcript = Transcript::new(b"Deserialize-And-Verify Test");
-            assert_eq!(
-                proof.verify_multiple(&bp_gens, &pc_gens, &mut transcript, &vc[0..m], n,),
-                Ok(())
-            );
-        }
-    }
+	for i in 0..4 {
+		for j in 0..4 {
+			let (n, m) = (8 << i, 1 << j);
+			let proof = RangeProof::from_bytes(&hex::decode(&proofs[i][j]).unwrap())
+				.expect("Rangeproof deserialization failed");
+			let mut transcript = Transcript::new(b"Deserialize-And-Verify Test");
+			assert_eq!(
+				proof.verify_multiple(&bp_gens, &pc_gens, &mut transcript, &vc[0..m], n,),
+				Ok(())
+			);
+		}
+	}
 }
 
 // This function generates test vectors and dumps them to stdout.
@@ -98,40 +89,38 @@ fn deserialize_and_verify() {
 //#[test]
 #[allow(dead_code)]
 fn generate_test_vectors() {
-    let pc_gens = PedersenGens::default();
-    let bp_gens = BulletproofGens::new(64, 8);
+	let pc_gens = PedersenGens::default();
+	let bp_gens = BulletproofGens::new(64, 8);
 
-    // Use a deterministic RNG for proving, so the test vectors can be
-    // generated reproducibly.
-    let mut test_rng = ChaChaRng::from_seed([24u8; 32]);
+	// Use a deterministic RNG for proving, so the test vectors can be
+	// generated reproducibly.
+	let mut test_rng = ChaChaRng::from_seed([24u8; 32]);
 
-    let values = vec![0u64, 1, 2, 3, 4, 5, 6, 7];
-    let blindings = (0..8)
-        .map(|_| Scalar::random(&mut test_rng))
-        .collect::<Vec<_>>();
+	let values = vec![0u64, 1, 2, 3, 4, 5, 6, 7];
+	let blindings = (0..8).map(|_| Scalar::random(&mut test_rng)).collect::<Vec<_>>();
 
-    for n in &[8, 16, 32, 64] {
-        for m in &[1, 2, 4, 8] {
-            let mut transcript = Transcript::new(b"Deserialize-And-Verify Test");
-            let (proof, value_commitments) = RangeProof::prove_multiple(
-                &bp_gens,
-                &pc_gens,
-                &mut transcript,
-                &values[0..*m],
-                &blindings[0..*m],
-                *n,
-            )
-            .unwrap();
+	for n in &[8, 16, 32, 64] {
+		for m in &[1, 2, 4, 8] {
+			let mut transcript = Transcript::new(b"Deserialize-And-Verify Test");
+			let (proof, value_commitments) = RangeProof::prove_multiple(
+				&bp_gens,
+				&pc_gens,
+				&mut transcript,
+				&values[0..*m],
+				&blindings[0..*m],
+				*n,
+			)
+			.unwrap();
 
-            println!("n,m = {}, {}", n, m);
-            println!("proof = \"{}\"", hex::encode(proof.to_bytes()));
-            println!("vc = [");
-            for com in &value_commitments {
-                println!("    \"{}\"", hex::encode(com.as_bytes()));
-            }
-            println!("]\n");
-        }
-    }
+			println!("n,m = {}, {}", n, m);
+			println!("proof = \"{}\"", hex::encode(proof.to_bytes()));
+			println!("vc = [");
+			for com in &value_commitments {
+				println!("    \"{}\"", hex::encode(com.as_bytes()));
+			}
+			println!("]\n");
+		}
+	}
 
-    panic!();
+	panic!();
 }
