@@ -1,8 +1,10 @@
 //! Errors related to proving and verifying proofs.
 
 extern crate alloc;
-use alloc::vec::Vec;
+#[cfg(not(feature = "std"))]
 use alloc::string::String;
+#[cfg(not(feature = "std"))]
+use alloc::vec::Vec;
 
 #[cfg(feature = "std")]
 use thiserror::Error;
@@ -143,8 +145,8 @@ pub enum R1CSError {
     // Occurs when a gadget receives an inconsistent input.
     #[cfg_attr(feature = "std", error("Gadget error: {description:?}"))]
     GadgetError {
-    	/// The description of the reasons for the error.
-    	description: String,
+        /// The description of the reasons for the error.
+        description: String,
     },
 }
 
