@@ -5,7 +5,6 @@
 #![doc(html_logo_url = "https://doc.dalek.rs/assets/dalek-logo-clear.png")]
 #![doc(html_root_url = "https://docs.rs/bulletproofs/2.0.0")]
 
-#[cfg(not(feature = "std"))]
 #[macro_use]
 extern crate alloc;
 
